@@ -15,6 +15,17 @@ archives:
   - format: tar.gz
     name_template: "genie_{{ .Os }}_{{ .Arch }}"
 
+brews:
+  - repository:
+      owner: saadjs
+      name: homebrew-tap
+    directory: Formula
+    homepage: "https://github.com/saadjs/genie-cli"
+    description: "Translate plain English into shell commands"
+    license: "MIT"
+    test: |
+      assert_match "genie", shell_output("#{bin}/genie --version")
+
 release:
   github:
     owner: saadjs
