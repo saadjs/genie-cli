@@ -17,6 +17,14 @@ $ genie
 
 ## Install
 
+### Homebrew
+
+```bash
+brew install saadjs/tap/genie
+```
+
+### Script
+
 ```bash
 curl -sL https://github.com/saadjs/genie-cli/releases/latest/download/install.sh | bash
 ```
