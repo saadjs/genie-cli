@@ -16,3 +16,18 @@ User request: %s`
 func BuildPrompt(input string) string {
 	return fmt.Sprintf(promptTemplate, input)
 }
+
+const explainTemplate = `You are a shell command explainer. The user will give you a shell command or pipeline. Explain what it does in plain English.
+
+Rules:
+- Be concise but thorough
+- Explain each part of the command or pipeline
+- Mention any flags and what they do
+- If the command is dangerous, mention that
+- Use plain English, no markdown formatting
+
+Command to explain: %s`
+
+func BuildExplainPrompt(command string) string {
+	return fmt.Sprintf(explainTemplate, command)
+}

@@ -8,8 +8,10 @@ import (
 )
 
 type Config struct {
-	Model   string `yaml:"model"`
-	AutoRun bool   `yaml:"auto_run"`
+	Provider  string `yaml:"provider"`
+	Model     string `yaml:"model"`
+	AutoRun   bool   `yaml:"auto_run"`
+	Clipboard *bool  `yaml:"clipboard"`
 }
 
 func Load() Config {

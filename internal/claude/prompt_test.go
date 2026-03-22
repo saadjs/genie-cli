@@ -34,3 +34,20 @@ func TestBuildPrompt_SpecialChars(t *testing.T) {
 		t.Error("prompt should preserve special characters")
 	}
 }
+
+func TestBuildExplainPrompt(t *testing.T) {
+	prompt := BuildExplainPrompt("ls -la | grep .go")
+	if !strings.Contains(prompt, "ls -la | grep .go") {
+		t.Error("explain prompt should contain the command")
+	}
+	if !strings.Contains(prompt, "command explainer") {
+		t.Error("explain prompt should contain the system instruction")
+	}
+}
+
+func TestBuildExplainPrompt_SpecialChars(t *testing.T) {
+	prompt := BuildExplainPrompt(`cat file.txt | awk '{print $1}'`)
+	if !strings.Contains(prompt, `awk '{print $1}'`) {
+		t.Error("explain prompt should preserve special characters")
+	}
+}

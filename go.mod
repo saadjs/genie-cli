@@ -3,6 +3,7 @@ module github.com/saadjs/genie-cli
 go 1.26.1
 
 require (
+	github.com/atotto/clipboard v0.1.4
 	github.com/fatih/color v1.19.0
 	gopkg.in/yaml.v3 v3.0.1
 )
