@@ -1,0 +1,21 @@
+version: 2
+builds:
+  - main: ./cmd/genie
+    binary: genie
+    ldflags:
+      - -s -w -X main.Version={{.Version}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    name_template: "genie_{{ .Os }}_{{ .Arch }}"
+
+release:
+  github:
+    owner: saadjs
+    name: genie-cli
