@@ -21,16 +21,12 @@ Genie supports both Claude and Codex as non-interactive backends. Claude is the 
 
 ## Install
 
+Homebrew is the recommended install method:
+
 ### Homebrew
 
 ```bash
 brew install saadjs/tap/genie
-```
-
-### Script
-
-```bash
-curl -sL https://github.com/saadjs/genie-cli/releases/latest/download/install.sh | bash
 ```
 
 ## Usage
