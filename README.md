@@ -1,4 +1,4 @@
-# genie
+# 🧞 genie
 
 Translate plain English into shell commands.
 
