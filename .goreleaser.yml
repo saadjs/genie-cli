@@ -16,7 +16,8 @@ archives:
     name_template: "genie_{{ .Os }}_{{ .Arch }}"
 
 brews:
-  - repository:
+  - name: genie
+    repository:
       owner: saadjs
       name: homebrew-tap
     directory: Formula
