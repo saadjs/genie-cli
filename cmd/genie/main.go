@@ -32,6 +32,8 @@ func main() {
 	flag.BoolVar(versionFlag, "v", false, "Print version (shorthand)")
 	historyFlag := flag.Bool("history", false, "Show recent command history")
 	explainFlag := flag.String("explain", "", "Explain what a command does")
+	noVerifyFlag := flag.Bool("no-verify", false, "Skip confirmation prompt (still shows safety warnings)")
+	flag.BoolVar(noVerifyFlag, "y", false, "Skip confirmation prompt (shorthand)")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "genie - translate plain English into shell commands\n\n")
@@ -43,6 +45,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  genie show me all files        Inline, no quotes needed for simple text\n")
 		fmt.Fprintf(os.Stderr, "  genie \"what's in this folder?\" Use double quotes for apostrophes/special chars\n")
 		fmt.Fprintf(os.Stderr, "  genie -r list all go files     Suggest command and run it immediately\n")
+		fmt.Fprintf(os.Stderr, "  genie --no-verify delete tmp   Run without confirmation (shows risk)\n")
 		fmt.Fprintf(os.Stderr, "  genie --explain \"ls -la\"       Explain what a command does\n")
 		fmt.Fprintf(os.Stderr, "  genie --history                Show recent command history\n\n")
 		fmt.Fprintf(os.Stderr, "Flags:\n")
@@ -100,7 +103,7 @@ func main() {
 		input = strings.Join(flag.Args(), " ")
 	}
 
-	shouldRun := cfg.AutoRun || *runFlag
+	shouldRun := cfg.AutoRun || *runFlag || *noVerifyFlag
 
 	prompt := claude.BuildPrompt(input)
 
@@ -129,13 +132,15 @@ func main() {
 	display.Command(result, shouldRun, copied)
 
 	if shouldRun {
-		color.New(color.FgYellow).Print("  Run this command? [y/N] ")
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
-		if answer != "y" && answer != "yes" {
-			fmt.Println("  Aborted.")
-			os.Exit(0)
+		if !*noVerifyFlag {
+			color.New(color.FgYellow).Print("  Run this command? [y/N] ")
+			scanner := bufio.NewScanner(os.Stdin)
+			scanner.Scan()
+			answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
+			if answer != "y" && answer != "yes" {
+				fmt.Println("  Aborted.")
+				os.Exit(0)
+			}
 		}
 		fmt.Println()
 		if err := runner.Run(result); err != nil {
