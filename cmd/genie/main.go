@@ -52,7 +52,7 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nConfig (optional): ~/.genie.yaml\n")
 		fmt.Fprintf(os.Stderr, "  provider: claude  # LLM provider: claude or codex (default: claude)\n")
-		fmt.Fprintf(os.Stderr, "  model: haiku      # Model override (defaults: haiku for claude, gpt-5.4-mini for codex)\n")
+		fmt.Fprintf(os.Stderr, "  model: haiku      # Model override (defaults: haiku for claude, gpt-5.6-luna for codex)\n")
 		fmt.Fprintf(os.Stderr, "  auto_run: false   # Execute the suggested command automatically\n")
 		fmt.Fprintf(os.Stderr, "  clipboard: true   # Copy suggested command to clipboard\n")
 	}
@@ -220,7 +220,7 @@ func providerModel(cfg config.Config, providerFlag, modelFlag string) (string, s
 
 func defaultModel(provider string) string {
 	if provider == "codex" {
-		return "gpt-5.4-mini"
+		return "gpt-5.6-luna"
 	}
 	return "haiku"
 }

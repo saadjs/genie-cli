@@ -45,7 +45,10 @@ func Call(prompt string, model string) (string, error) {
 	}
 
 	if runErr != nil {
-		message := strings.TrimSpace(stderr.String())
+		message := extractError(stderr.String() + "\n" + stdout.String())
+		if message == "" {
+			message = strings.TrimSpace(stderr.String())
+		}
 		if message == "" {
 			message = strings.TrimSpace(stdout.String())
 		}
@@ -64,4 +67,23 @@ func Call(prompt string, model string) (string, error) {
 	}
 
 	return result, nil
+}
+
+// extractError pulls unique ERROR: lines out of codex CLI output, which
+// otherwise includes a session banner, the echoed prompt, and other noise.
+func extractError(output string) string {
+	seen := make(map[string]bool)
+	var messages []string
+	for _, line := range strings.Split(output, "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line, "ERROR:") {
+			continue
+		}
+		line = strings.TrimSpace(strings.TrimPrefix(line, "ERROR:"))
+		if line != "" && !seen[line] {
+			seen[line] = true
+			messages = append(messages, line)
+		}
+	}
+	return strings.Join(messages, "; ")
 }

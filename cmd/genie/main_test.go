@@ -57,8 +57,8 @@ func TestProviderModelDefaultsCodexModel(t *testing.T) {
 	if provider != "codex" {
 		t.Fatalf("provider = %q, want %q", provider, "codex")
 	}
-	if model != "gpt-5.4-mini" {
-		t.Fatalf("model = %q, want %q", model, "gpt-5.4-mini")
+	if model != "gpt-5.6-luna" {
+		t.Fatalf("model = %q, want %q", model, "gpt-5.6-luna")
 	}
 }
 

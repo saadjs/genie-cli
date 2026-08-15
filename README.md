@@ -69,7 +69,7 @@ Optional config file at `~/.genie.yaml`:
 
 ```yaml
 provider: claude # or codex (default: claude)
-model: haiku # default is haiku for claude, gpt-5.4-mini for codex
+model: haiku # default is haiku for claude, gpt-5.6-luna for codex
 auto_run: false # Execute the suggested command automatically (default: false)
 clipboard: true # Copy the suggested command to clipboard (default: true)
 ```

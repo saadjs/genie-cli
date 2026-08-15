@@ -85,3 +85,14 @@ exit 1
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestExtractError(t *testing.T) {
+	got := extractError("banner\nERROR: first\nnoise\nERROR: first\nERROR: second\n")
+	want := "first; second"
+	if got != want {
+		t.Fatalf("extractError = %q, want %q", got, want)
+	}
+	if got := extractError("no error here"); got != "" {
+		t.Fatalf("extractError = %q, want empty", got)
+	}
+}
