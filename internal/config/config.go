@@ -1,6 +1,9 @@
 package config
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -14,20 +17,36 @@ type Config struct {
 	Clipboard *bool  `yaml:"clipboard"`
 }
 
-func Load() Config {
+// Path returns the config file location, ~/.genie.yaml.
+func Path() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return Config{}
+		return ""
 	}
+	return filepath.Join(home, ".genie.yaml")
+}
 
-	data, err := os.ReadFile(filepath.Join(home, ".genie.yaml"))
-	if err != nil {
-		return Config{}
-	}
-
+// Load reads the config at path. A missing file is not an error; a file
+// that can't be parsed is, so typos don't silently fall back to defaults.
+func Load(path string) (Config, error) {
 	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return Config{}
+	if path == "" {
+		return cfg, nil
 	}
-	return cfg
+	data, err := os.ReadFile(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return cfg, nil
+	}
+	if err != nil {
+		return cfg, err
+	}
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return Config{}, fmt.Errorf("%s: %w", path, err)
+	}
+	return cfg, nil
+}
+
+// ClipboardEnabled reports whether to copy commands; it defaults to true.
+func (c Config) ClipboardEnabled() bool {
+	return c.Clipboard == nil || *c.Clipboard
 }

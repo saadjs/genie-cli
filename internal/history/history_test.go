@@ -3,6 +3,7 @@ package history
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -55,5 +56,55 @@ func TestLoadMalformedLine(t *testing.T) {
 	}
 	if len(entries) != 1 {
 		t.Fatalf("expected 1 valid entry, got %d", len(entries))
+	}
+}
+
+func TestLoadFewerThanN(t *testing.T) {
+	PathOverride = filepath.Join(t.TempDir(), "history")
+	defer func() { PathOverride = "" }()
+
+	_ = Save("one", "1")
+	_ = Save("two", "2")
+
+	entries, err := Load(20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 2 || entries[0].Request != "two" || entries[1].Request != "one" {
+		t.Fatalf("got %+v, want two then one", entries)
+	}
+}
+
+func TestSaveIsPrivate(t *testing.T) {
+	PathOverride = filepath.Join(t.TempDir(), "history")
+	defer func() { PathOverride = "" }()
+
+	if err := os.WriteFile(PathOverride, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := Save("r", "c"); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(PathOverride)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o600 {
+		t.Fatalf("history perms = %o, want 600", perm)
+	}
+}
+
+func TestLoadSurvivesOversizedEntry(t *testing.T) {
+	PathOverride = filepath.Join(t.TempDir(), "history")
+	defer func() { PathOverride = "" }()
+	if err := Save(strings.Repeat("x", 2<<20), "big"); err != nil {
+		t.Fatal(err)
+	}
+	if err := Save("small", "ls"); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := Load(5)
+	if err != nil || len(entries) != 2 || entries[0].Command != "ls" {
+		t.Fatalf("Load = %d entries, %v", len(entries), err)
 	}
 }

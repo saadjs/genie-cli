@@ -8,7 +8,7 @@ $ genie
 
   $ ls ~/Desktop
 
-  Copied to clipboard!
+  ✓ Copied to clipboard
 ```
 
 Genie supports both Claude and Codex as non-interactive backends. Claude is the default provider.
@@ -39,11 +39,14 @@ genie
 genie show me all files in this folder
 genie "what's in the desktop folder?"
 
-# Auto-execute (asks for confirmation before running)
+# Ask before running the suggested command
 genie -r list all go files
 
+# Run without asking (safety warnings still show)
+genie -y list all go files
+
 # Explain an existing command
-genie --explain "ls -la | grep .go"
+genie -e "ls -la | grep .go"
 
 # Show recent history
 genie --history
@@ -54,14 +57,15 @@ genie --provider codex show me all files in this folder
 
 ## Flags
 
-| Flag              | Description                              |
-| ----------------- | ---------------------------------------- |
-| `--explain`       | Explain an existing shell command        |
-| `--history`       | Show the last 20 saved requests/commands |
-| `--provider`      | LLM provider: `claude` or `codex`        |
-| `-r`, `--run`     | Show the command, then ask to execute it |
-| `--model`         | Override the provider model              |
-| `-v`, `--version` | Print version                            |
+| Flag                | Description                               |
+| ------------------- | ----------------------------------------- |
+| `-r`, `--run`       | Show the command, then ask to run it      |
+| `-y`, `--no-verify` | Run the command without asking            |
+| `-e`, `--explain`   | Explain a command instead of writing one  |
+| `--history`         | Show the last 20 requests and commands    |
+| `--provider`        | LLM provider: `claude` or `codex`         |
+| `--model`           | Override the provider model               |
+| `-v`, `--version`   | Print version                             |
 
 ## Config
 
@@ -69,14 +73,30 @@ Optional config file at `~/.genie.yaml`:
 
 ```yaml
 provider: claude # or codex (default: claude)
-model: haiku # default is haiku for claude, gpt-5.6-luna for codex
-auto_run: false # Execute the suggested command automatically (default: false)
+model: claude-haiku-5-5 # default is claude-haiku-5-5 for claude, gpt-6-luna for codex
+auto_run: false # Always ask to run the suggested command (default: false)
 clipboard: true # Copy the suggested command to clipboard (default: true)
+```
+
+`model` applies to the configured `provider` only, so `--provider codex` falls back to the Codex default.
+
+## Scripts and agents
+
+Genie keeps stdout clean so it composes with pipes and is safe to call from scripts and coding agents:
+
+- stdout carries only the result. Prompts, the spinner, warnings, and errors go to stderr.
+- When stdout isn't a terminal, the command is printed bare (no color, no `$`) and the clipboard is left alone.
+- `--history` prints JSON lines when piped.
+- `-r` refuses to prompt without a terminal; pass `-y` to run non-interactively.
+- Exit status: `0` success, `1` error or declined, `2` usage error, `130` interrupted. With `-r`/`-y`, genie exits with the command's own status.
+
+```bash
+genie list all go files | xargs wc -l
 ```
 
 ## Features
 
-- Translate plain English into shell commands
+- Translate plain English into shell commands tailored to your OS and shell
 - Explain existing shell commands with `--explain`
 - Show recent history with `--history`
 - Copy suggested commands to the clipboard by default
@@ -100,4 +120,4 @@ make test
 
 ## How it works
 
-Genie sends your plain English request to the selected provider CLI in non-interactive mode. Claude uses `claude -p`; Codex uses `codex exec`. The response is parsed and displayed as a shell command. Nothing is executed unless you use the `-r` flag and confirm.
+Genie sends your request to the selected provider CLI in non-interactive mode: `claude -p` or `codex exec`. It strips everything a one-shot answer doesn't need (tools, MCP servers, session files, the agent system prompt), which roughly halves Claude's startup latency. The reply is cleaned up and displayed as a shell command. Nothing is executed unless you use `-r` and confirm, or pass `-y`.

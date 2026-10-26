@@ -4,8 +4,16 @@ LDFLAGS := -ldflags "-s -w -X main.Version=$(VERSION)"
 build:
 	go build $(LDFLAGS) -o bin/genie ./cmd/genie
 
+install:
+	go install $(LDFLAGS) ./cmd/genie
+
 test:
-	go test -v ./...
+	go test -race ./...
+
+check:
+	@test -z "$$(gofmt -l .)" || (gofmt -l .; echo "run: gofmt -w ." && exit 1)
+	go vet ./...
+	go test -race ./...
 
 clean:
 	rm -rf bin/
@@ -13,4 +21,4 @@ clean:
 release:
 	goreleaser release --clean
 
-.PHONY: build test clean release
+.PHONY: build install test check clean release
